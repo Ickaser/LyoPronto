@@ -3,7 +3,7 @@ import numpy as np
 import math
 import csv
 from . import constant
-from . import functions
+from . import sci_funcs
 from pdb import set_trace as keyboard
 
 ################# Primary drying at fixed set points ###############
@@ -13,7 +13,7 @@ def dry(vial,product,ht,Pchamber,Tshelf,time,Tbot_exp):
     ##################  Initialization ################
 
     # Initial fill height
-    Lpr0 = functions.Lpr0_FUN(vial['Vfill'],vial['Ap'],product['cSolid'])   # cm
+    Lpr0 = sci_funcs.Lpr0_FUN(vial['Vfill'],vial['Ap'],product['cSolid'])   # cm
 
     # Initialization of cake length
     Lck = 0.0    # Cake length in cm
@@ -47,11 +47,11 @@ def dry(vial,product,ht,Pchamber,Tshelf,time,Tbot_exp):
 
     for iStep,t in enumerate(time): # Loop through for the time specified in the input file
 
-        Kv = functions.Kv_FUN(ht['KC'],ht['KP'],ht['KD'],Pch)  # Vial heat transfer coefficient in cal/s/K/cm^2
+        Kv = sci_funcs.Kv_FUN(ht['KC'],ht['KP'],ht['KD'],Pch)  # Vial heat transfer coefficient in cal/s/K/cm^2
 
-        Tsub = sp.fsolve(functions.T_sub_Rp_finder, T0, args = (vial['Av'],vial['Ap'],Kv,Lpr0,Lck,Tbot_exp[iStep],Tsh)) # Sublimation front temperature array in degC
-        Rp = functions.Rp_finder(Tsub,Lpr0,Lck,Pch,Tbot_exp[iStep])    #     Product resistance in cm^2-Torr-hr/g
-        dmdt = functions.sub_rate(vial['Ap'],Rp,Tsub,Pch)   # Total sublimation rate array in kg/hr
+        Tsub = sp.fsolve(sci_funcs.T_sub_Rp_finder, T0, args = (vial['Av'],vial['Ap'],Kv,Lpr0,Lck,Tbot_exp[iStep],Tsh)) # Sublimation front temperature array in degC
+        Rp = sci_funcs.Rp_finder(Tsub,Lpr0,Lck,Pch,Tbot_exp[iStep])    #     Product resistance in cm^2-Torr-hr/g
+        dmdt = sci_funcs.sub_rate(vial['Ap'],Rp,Tsub,Pch)   # Total sublimation rate array in kg/hr
         if dmdt<0:
             print("Shelf temperature is too low for sublimation.")
             dmdt = 0.0

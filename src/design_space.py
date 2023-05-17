@@ -3,7 +3,7 @@ import numpy as np
 import math
 import csv
 from . import constant
-from . import functions
+from . import sci_funcs
 from pdb import set_trace as keyboard
 
 ################# Primary drying at fixed set points ###############
@@ -17,7 +17,7 @@ def dry(vial,product,ht,Pchamber,Tshelf,dt,eq_cap,nVial):
     sub_flux_end = np.zeros([np.size(Tshelf['setpt']),np.size(Pchamber['setpt'])])
     
     # Initial fill height
-    Lpr0 = functions.Lpr0_FUN(vial['Vfill'],vial['Ap'],product['cSolid'])   # cm
+    Lpr0 = sci_funcs.Lpr0_FUN(vial['Vfill'],vial['Ap'],product['cSolid'])   # cm
 
     ############  Shelf temperature isotherms ##########
 
@@ -43,7 +43,7 @@ def dry(vial,product,ht,Pchamber,Tshelf,dt,eq_cap,nVial):
             T0=Tsh   # degC
 
             # Vial heat transfer coefficient in cal/s/K/cm^2
-            Kv = functions.Kv_FUN(ht['KC'],ht['KP'],ht['KD'],Pch) 
+            Kv = sci_funcs.Kv_FUN(ht['KC'],ht['KP'],ht['KD'],Pch) 
 
             ######################################################
 
@@ -51,14 +51,14 @@ def dry(vial,product,ht,Pchamber,Tshelf,dt,eq_cap,nVial):
 
             while(Lck<=Lpr0): # Dry the entire frozen product
     
-                Rp = functions.Rp_FUN(Lck,product['R0'],product['A1'],product['A2'])  # Product resistance in cm^2-hr-Torr/g
+                Rp = sci_funcs.Rp_FUN(Lck,product['R0'],product['A1'],product['A2'])  # Product resistance in cm^2-hr-Torr/g
 
-                Tsub = sp.fsolve(functions.T_sub_solver_FUN, T0, args = (Pch,vial['Av'],vial['Ap'],Kv,Lpr0,Lck,Rp,Tsh)) # Sublimation front temperature array in degC
-                dmdt = functions.sub_rate(vial['Ap'],Rp,Tsub,Pch)   # Total sublimation rate array in kg/hr
+                Tsub = sp.fsolve(sci_funcs.T_sub_solver_FUN, T0, args = (Pch,vial['Av'],vial['Ap'],Kv,Lpr0,Lck,Rp,Tsh)) # Sublimation front temperature array in degC
+                dmdt = sci_funcs.sub_rate(vial['Ap'],Rp,Tsub,Pch)   # Total sublimation rate array in kg/hr
                 if dmdt<0:
                     print("Shelf temperature is too low for sublimation.")
                     dmdt = 0.0
-                Tbot = functions.T_bot_FUN(Tsub,Lpr0,Lck,Pch,Rp)    # Vial bottom temperature array in degC
+                Tbot = sci_funcs.T_bot_FUN(Tsub,Lpr0,Lck,Pch,Rp)    # Vial bottom temperature array in degC
 
                 # Sublimated ice length
                 dL = (dmdt*constant.kg_To_g)*dt/(1-product['cSolid']*constant.rho_solution/constant.rho_solute)/(vial['Ap']*constant.rho_ice)*(1-product['cSolid']*(constant.rho_solution-constant.rho_ice)/constant.rho_solute) # cm
@@ -122,7 +122,7 @@ def dry(vial,product,ht,Pchamber,Tshelf,dt,eq_cap,nVial):
         Lck = 0.0    # Cake length in cm
 
         # Vial heat transfer coefficient in cal/s/K/cm^2
-        Kv = functions.Kv_FUN(ht['KC'],ht['KP'],ht['KD'],Pch) 
+        Kv = sci_funcs.Kv_FUN(ht['KC'],ht['KP'],ht['KD'],Pch) 
 
         ######################################################        
 
@@ -130,11 +130,11 @@ def dry(vial,product,ht,Pchamber,Tshelf,dt,eq_cap,nVial):
 
         while(Lck<=Lpr0): # Dry the entire frozen product
     
-            Rp = functions.Rp_FUN(Lck,product['R0'],product['A1'],product['A2'])  # Product resistance in cm^2-hr-Torr/g
+            Rp = sci_funcs.Rp_FUN(Lck,product['R0'],product['A1'],product['A2'])  # Product resistance in cm^2-hr-Torr/g
     
             try:
-                Tsub = sp.fsolve(functions.T_sub_fromTpr, product['T_pr_crit'], args = (product['T_pr_crit'],Lpr0,Lck,Pch,Rp)) # Sublimation front temperature array in degC
-                dmdt = functions.sub_rate(vial['Ap'],Rp,Tsub,Pch)   # Total sublimation rate array in kg/hr
+                Tsub = sp.fsolve(sci_funcs.T_sub_fromTpr, product['T_pr_crit'], args = (product['T_pr_crit'],Lpr0,Lck,Pch,Rp)) # Sublimation front temperature array in degC
+                dmdt = sci_funcs.sub_rate(vial['Ap'],Rp,Tsub,Pch)   # Total sublimation rate array in kg/hr
             except Exception:
                 keyboard()
                 
@@ -180,9 +180,9 @@ def dry(vial,product,ht,Pchamber,Tshelf,dt,eq_cap,nVial):
     drying_time_eq_cap = Lpr0/((dmdt_eq_cap/nVial*constant.kg_To_g)/(1-product['cSolid']*constant.rho_solution/constant.rho_solute)/(vial['Ap']*constant.rho_ice)*(1-product['cSolid']*(constant.rho_solution-constant.rho_ice)/constant.rho_solute))    # Drying time in hr
 
     Lck = np.linspace(0,Lpr0,100)    # Cake length in cm
-    Rp = functions.Rp_FUN(Lck,product['R0'],product['A1'],product['A2'])    # Product resistance in cm^2-hr-Torr/g
+    Rp = sci_funcs.Rp_FUN(Lck,product['R0'],product['A1'],product['A2'])    # Product resistance in cm^2-hr-Torr/g
     for k,Pch in enumerate(Pchamber['setpt']):
-        T_max_eq_cap[k] = functions.Tbot_max_eq_cap(Pch,dmdt_eq_cap[k],Lpr0,Lck,Rp,vial['Ap'])        # Maximum product temperature in degC
+        T_max_eq_cap[k] = sci_funcs.Tbot_max_eq_cap(Pch,dmdt_eq_cap[k],Lpr0,Lck,Rp,vial['Ap'])        # Maximum product temperature in degC
 
     #####################################################
 

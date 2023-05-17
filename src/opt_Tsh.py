@@ -3,7 +3,7 @@ import numpy as np
 import math
 import csv
 from . import constant
-from . import functions
+from . import sci_funcs
 from pdb import set_trace as keyboard
 
 
@@ -14,7 +14,7 @@ def dry(vial,product,ht,Pchamber,Tshelf,dt,eq_cap,nVial):
     ##################  Initialization ################
 
     # Initial fill height
-    Lpr0 = functions.Lpr0_FUN(vial['Vfill'],vial['Ap'],product['cSolid'])   # cm
+    Lpr0 = sci_funcs.Lpr0_FUN(vial['Vfill'],vial['Ap'],product['cSolid'])   # cm
 
     # Initialization of time
     iStep = 0      # Time iteration number
@@ -41,20 +41,20 @@ def dry(vial,product,ht,Pchamber,Tshelf,dt,eq_cap,nVial):
 
     while(Lck<=Lpr0): # Dry the entire frozen product
 
-        Rp = functions.Rp_FUN(Lck,product['R0'],product['A1'],product['A2'])  # Product resistance in cm^2-hr-Torr/g
+        Rp = sci_funcs.Rp_FUN(Lck,product['R0'],product['A1'],product['A2'])  # Product resistance in cm^2-hr-Torr/g
     
         # Quantities solved for: x = [Pch,dmdt,Tbot,Tsh,Psub,Tsub,Kv]
         fun = lambda x: (x[0]-x[4])    # Objective function to be minimized to maximize sublimation rate
         x0 = [Pch,0.0,T0,T0,Pch,T0,3.0e-4]    # Initial values
         # Constraints
-        cons = ({'type':'eq','fun':lambda x: functions.Eq_Constraints(x[0],x[1],x[2],x[3],x[4],x[5],x[6],Lpr0,Lck,vial['Av'],vial['Ap'],Rp)[0]},  # sublimation front pressure in Torr
-            {'type':'eq','fun':lambda x: functions.Eq_Constraints(x[0],x[1],x[2],x[3],x[4],x[5],x[6],Lpr0,Lck,vial['Av'],vial['Ap'],Rp)[1]},    # sublimation rate in kg/hr
-            {'type':'eq','fun':lambda x: functions.Eq_Constraints(x[0],x[1],x[2],x[3],x[4],x[5],x[6],Lpr0,Lck,vial['Av'],vial['Ap'],Rp)[2]},    # vial heat transfer balance
-            {'type':'eq','fun':lambda x: functions.Eq_Constraints(x[0],x[1],x[2],x[3],x[4],x[5],x[6],Lpr0,Lck,vial['Av'],vial['Ap'],Rp)[3]},    # shelf temperature in degC
-            {'type':'eq','fun':lambda x: x[6]-functions.Kv_FUN(ht['KC'],ht['KP'],ht['KD'],x[0])},    # vial heat transfer coefficient in cal/s/K/cm^2
+        cons = ({'type':'eq','fun':lambda x: sci_funcs.Eq_Constraints(x[0],x[1],x[2],x[3],x[4],x[5],x[6],Lpr0,Lck,vial['Av'],vial['Ap'],Rp)[0]},  # sublimation front pressure in Torr
+            {'type':'eq','fun':lambda x: sci_funcs.Eq_Constraints(x[0],x[1],x[2],x[3],x[4],x[5],x[6],Lpr0,Lck,vial['Av'],vial['Ap'],Rp)[1]},    # sublimation rate in kg/hr
+            {'type':'eq','fun':lambda x: sci_funcs.Eq_Constraints(x[0],x[1],x[2],x[3],x[4],x[5],x[6],Lpr0,Lck,vial['Av'],vial['Ap'],Rp)[2]},    # vial heat transfer balance
+            {'type':'eq','fun':lambda x: sci_funcs.Eq_Constraints(x[0],x[1],x[2],x[3],x[4],x[5],x[6],Lpr0,Lck,vial['Av'],vial['Ap'],Rp)[3]},    # shelf temperature in degC
+            {'type':'eq','fun':lambda x: x[6]-sci_funcs.Kv_FUN(ht['KC'],ht['KP'],ht['KD'],x[0])},    # vial heat transfer coefficient in cal/s/K/cm^2
             {'type':'eq','fun':lambda x: x[0]-Pch},    # chamber pressure fixed in Torr
-            {'type':'ineq','fun':lambda x: functions.Ineq_Constraints(x[0],x[1],product['T_pr_crit'],x[2],eq_cap['a'],eq_cap['b'],nVial)[0]},  # equipment capability inequlity
-            {'type':'ineq','fun':lambda x: functions.Ineq_Constraints(x[0],x[1],product['T_pr_crit'],x[2],eq_cap['a'],eq_cap['b'],nVial)[1]})  # maximum product temperature inequality
+            {'type':'ineq','fun':lambda x: sci_funcs.Ineq_Constraints(x[0],x[1],product['T_pr_crit'],x[2],eq_cap['a'],eq_cap['b'],nVial)[0]},  # equipment capability inequlity
+            {'type':'ineq','fun':lambda x: sci_funcs.Ineq_Constraints(x[0],x[1],product['T_pr_crit'],x[2],eq_cap['a'],eq_cap['b'],nVial)[1]})  # maximum product temperature inequality
         # Bounds for the unknowns
         bnds = ((None,None),(None,None),(None,None),(Tshelf['min'],Tshelf['max']),(None,None),(None,None),(None,None))
         # Minimize the objective function i.e. maximize the sublimation rate

@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 import sys
+import os
+import argparse
 import scipy.optimize as sp
 import numpy as np
 import math
@@ -23,6 +25,11 @@ from matplotlib import rc as matplotlibrc
 import time
 
 current_time = time.strftime("%y%m%d_%H%M",time.localtime())
+parser = argparse.ArgumentParser()
+parser.add_argument("out_folder", help="local folder name for storing output ('./out_folder' assumed)")
+out_loc = os.getcwd() + "/" + parser.parse_args().out_folder + "/"
+os.makedirs(out_loc, exist_ok=True)
+print(f"Saving output files to {out_loc} .")
 
 ################################################################
 
@@ -86,7 +93,7 @@ else:
 
 # Chamber Pressure
 if sim['tool'] == 'Freezing Calculator':
-    0
+    pass
 elif sim['tool'] == 'Design-Space-Generator':
     # Array of chamber pressure set points in Torr
     Pchamber = dict([('setpt',[0.1,0.4,0.7,1.5])])
@@ -134,7 +141,7 @@ if not(sim['tool'] == 'Freezing Calculator' and sim['tool'] == 'Primary Drying C
 # Write data to files
 #save input_saved.csv
 
-csvfile = open('input_saved_'+current_time+'.csv', 'w')
+csvfile = open(out_loc + 'input_saved_'+current_time+'.csv', 'w')
 
 try:
     writer = csv.writer(csvfile)
@@ -256,7 +263,7 @@ if sim['tool'] == 'Primary Drying Calculator':
                 Tbot_exp = np.append(Tbot_exp,line_string[1])
         fi.close()
         output_saved, product_res = calc_unknownRp.dry(vial,product,ht,Pchamber,Tshelf,time,Tbot_exp)
-        params,params_covariance = sp.curve_fit(functions.Rp_FUN,product_res[:,1],product_res[:,2],p0=[1.0,0.0,0.0])
+        params,params_covariance = sp.curve_fit(sci_funcs.Rp_FUN,product_res[:,1],product_res[:,2],p0=[1.0,0.0,0.0])
         print("R0 = "+str(params[0])+"\n")
         print("A1 = "+str(params[1])+"\n")
         print("A2 = "+str(params[2])+"\n")
@@ -318,7 +325,7 @@ Color_list = ['b','m','g','c','r','y','k']    # Line colors
 # Write data to files
 #save output_saved.csv
 # Plot data and save figures
-csvfile = open('output_saved_'+current_time+'.csv', 'w')
+csvfile = open(out_loc + 'output_saved_'+current_time+'.csv', 'w')
 
 if sim['tool'] == 'Design-Space-Generator':
     try:
@@ -375,7 +382,7 @@ if sim['tool'] == 'Design-Space-Generator':
     ax.fill(x1,x2,color=[1.,1.,0.6])
     figure_name = 'DesignSpace_SublimationFlux_'+current_time+'.pdf'
     plt.tight_layout()
-    plt.savefig(figure_name)
+    plt.savefig(out_loc + figure_name)
     plt.close()    
     
     x = np.linspace(np.min(Pchamber['setpt']),np.max(Pchamber['setpt']),1000)    # pressure range in Torr
@@ -416,7 +423,7 @@ if sim['tool'] == 'Design-Space-Generator':
     ax.fill(x1,x2,color=[1.,1.,0.6])
     figure_name = 'DesignSpace_DryingTime_'+current_time+'.pdf'
     plt.tight_layout()
-    plt.savefig(figure_name)
+    plt.savefig(out_loc + figure_name)
     plt.close()    
 
     x = np.linspace(np.min(Pchamber['setpt']),np.max(Pchamber['setpt']),1000)    # pressure range in Torr
@@ -457,7 +464,7 @@ if sim['tool'] == 'Design-Space-Generator':
     ax.fill(x1,x2,color=[1.,1.,0.6])
     figure_name = 'DesignSpace_ProductTemperature_'+current_time+'.pdf'
     plt.tight_layout()
-    plt.savefig(figure_name)
+    plt.savefig(out_loc + figure_name)
     plt.close()    
 
 elif sim['tool'] == 'Freezing Calculator':
@@ -491,7 +498,7 @@ elif sim['tool'] == 'Freezing Calculator':
     ax.set_ylim([ll,ul+5.0])
     figure_name = 'Temperatures_'+current_time+'.pdf'
     plt.tight_layout()
-    plt.savefig(figure_name)
+    plt.savefig(out_loc + figure_name)
     plt.close()    
 
 else:
@@ -529,7 +536,7 @@ else:
     ax2.yaxis.labelpad = labelPad
     figure_name = 'Pressure,SublimationFlux_'+current_time+'.pdf'
     plt.tight_layout()
-    plt.savefig(figure_name)
+    plt.savefig(out_loc + figure_name)
     plt.close()
     
     fig = plt.figure(0,figsize=(figwidth,figheight))
@@ -549,7 +556,7 @@ else:
     ax.yaxis.labelpad = labelPad
     figure_name = 'PercentDried_'+current_time+'.pdf'
     plt.tight_layout()
-    plt.savefig(figure_name)
+    plt.savefig(out_loc + figure_name)
     plt.close()
     
     fig = plt.figure(0,figsize=(figwidth,figheight))
@@ -575,7 +582,7 @@ else:
     ax.set_ylim([ll,ul+5.0])
     figure_name = 'Temperatures_'+current_time+'.pdf'
     plt.tight_layout()
-    plt.savefig(figure_name)
+    plt.savefig(out_loc + figure_name)
     plt.close()
 
 #######################################################

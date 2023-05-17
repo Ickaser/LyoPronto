@@ -3,8 +3,8 @@ import numpy as np
 import math
 import csv
 from . import constant
-from . import functions
-from pdb import set_trace as keyboard
+from . import sci_funcs
+# from pdb import set_trace as keyboard
 
 
 ################# Freezing ###############
@@ -14,7 +14,7 @@ def freeze(vial,product,h_freezing,Tshelf,dt):
     ##################  Initialization ################
 
     # Initial fill height
-    Lpr0 = functions.Lpr0_FUN(vial['Vfill'],vial['Ap'],product['cSolid'])   # cm
+    Lpr0 = sci_funcs.Lpr0_FUN(vial['Vfill'],vial['Ap'],product['cSolid'])   # cm
 
     # Frozen product volume
     V_frozen = Lpr0*vial['Ap']    # mL
@@ -76,7 +76,7 @@ def freeze(vial,product,h_freezing,Tshelf,dt):
             # Ramp shelf temperature till next set point is reached and then maintain at set point
             Tsh = Tsh + r[i]*constant.hr_To_min*dt    # degC
             # Product temperature
-            Tpr = functions.lumped_cap_Tpr(t-t_tr[i-1],Tpr0,constant.rho_solution,constant.Cp_solution,vial['Vfill'],h_freezing,vial['Av'],Tsh,Tsh_tr[i-1],r[i])    # degC
+            Tpr = sci_funcs.lumped_cap_Tpr(t-t_tr[i-1],Tpr0,constant.rho_solution,constant.Cp_solution,vial['Vfill'],h_freezing,vial['Av'],Tsh,Tsh_tr[i-1],r[i])    # degC
 
         # Update record as functions of the cycle time
             freezing_output_saved = np.append(freezing_output_saved, [[t, Tsh, Tpr]],axis=0)    
@@ -92,7 +92,7 @@ def freeze(vial,product,h_freezing,Tshelf,dt):
     ################ Crystallization ######################
 
     tn = t    # Nucleation onset time in hr
-    dt_crystallization = functions.crystallization_time_FUN(vial['Vfill'],h_freezing,vial['Av'],product['Tf'],product['Tn'],Tsh)    # Crystallization time in hr
+    dt_crystallization = sci_funcs.crystallization_time_FUN(vial['Vfill'],h_freezing,vial['Av'],product['Tf'],product['Tn'],Tsh)    # Crystallization time in hr
     ts = tn + dt_crystallization    # Solidification onset time in hr
 
     while(t<ts):
@@ -122,7 +122,7 @@ def freeze(vial,product,h_freezing,Tshelf,dt):
 
     while(t<t_tr[-1]):
 
-        Tpr = functions.lumped_cap_Tpr(t-ts,product['Tf'],constant.rho_ice,constant.Cp_ice,V_frozen,h_freezing,vial['Av'],Tsh,Tsh,0.0)
+        Tpr = sci_funcs.lumped_cap_Tpr(t-ts,product['Tf'],constant.rho_ice,constant.Cp_ice,V_frozen,h_freezing,vial['Av'],Tsh,Tsh,0.0)
 
         # Update record as functions of the cycle time
         freezing_output_saved = np.append(freezing_output_saved, [[t, Tsh, Tpr]],axis=0)
