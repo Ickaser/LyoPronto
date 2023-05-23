@@ -1,6 +1,6 @@
 Full API Reference
 ==================
 
-.. automodule:: LyoPronto
-.. automodule:: LyoPronto.calc_knownRp
+.. automodule:: lyopronto
+.. automodule:: lyopronto.calc_knownRp
     :members: dry
