@@ -1,12 +1,15 @@
 #!/usr/bin/env python
 
+import os
 import sys
 import scipy.optimize as sp
 import numpy as np
 import math
 import csv
 
-from .src import *
+# Assume that we are running in the LyoPronto directory
+sys.path.insert(0, os.path.abspath("./src/"))
+from lyopronto import *
 # from . import constant
 # from . import freezing
 # from . import calc_knownRp
