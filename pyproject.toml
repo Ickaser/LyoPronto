@@ -1,0 +1,23 @@
+[project]
+version = "1.0.0"
+readme = "README.md"
+requires-python = ">=3.7"
+authors = [
+    {name = "Gayathri Shivkumar"},
+    {name = "Petr Kazarin"},
+    {name = "Alina Alexeenko"},
+    ]
+maintainers = [
+    {name = "Isaac Wheeler", email="iwheeler@purdue.edu"},
+    ]
+
+[project.urls]
+Documentation = "https://lyopronto.readthedocs.io/en/latest/index.html"
+
+
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[readme]
