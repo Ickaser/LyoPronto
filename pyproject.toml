@@ -1,4 +1,5 @@
 [project]
+name = "LyoPronto"
 version = "1.0.0"
 readme = "README.md"
 requires-python = ">=3.7"
@@ -19,5 +20,3 @@ Documentation = "https://lyopronto.readthedocs.io/en/latest/index.html"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
-
-[readme]
